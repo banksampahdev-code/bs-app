@@ -118,11 +118,21 @@ export default function RegisterPage() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                formData.password && formData.password.length < 8
+                  ? 'border-red-300 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-green-500'
+              }`}
               required
               minLength={8}
             />
-            <p className="text-xs text-gray-500 mt-1">Minimal 8 karakter</p>
+            {formData.password && formData.password.length < 8 ? (
+              <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                <span>⚠️</span> Password harus minimal 8 karakter (saat ini: {formData.password.length})
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1">Minimal 8 karakter</p>
+            )}
           </div>
 
           <div>

@@ -3,14 +3,30 @@
 import { useEffect, useState } from 'react';
 import { memberService } from '@/lib/api';
 import { User } from '@/lib/types';
-import { Users, Search, MessageCircle } from 'lucide-react';
+import { Users, Search, MessageCircle, UserPlus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuthStore } from '@/lib/store/authStore';
 
 export default function MemberPage() {
+  const { user: currentUser } = useAuthStore();
   const [members, setMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState('pengguna');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    nama_lengkap: '',
+    email: '',
+    password: '',
+    no_hp: '',
+    kelurahan: '',
+    kecamatan: '',
+    kabupaten: '',
+    detail_alamat: '',
+    role: 'pengguna' as 'pengguna' | 'pengelola'
+  });
+
+  const isAdmin = currentUser?.role === 'admin';
 
   useEffect(() => {
     loadMembers();
@@ -54,6 +70,72 @@ export default function MemberPage() {
     window.open(whatsappUrl, '_blank');
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { token } = useAuthStore.getState();
+
+    try {
+      const response = await fetch('/api/member/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(createFormData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Gagal membuat akun');
+      }
+
+      alert('Akun berhasil dibuat!');
+      setShowCreateModal(false);
+      setCreateFormData({
+        nama_lengkap: '',
+        email: '',
+        password: '',
+        no_hp: '',
+        kelurahan: '',
+        kecamatan: '',
+        kabupaten: '',
+        detail_alamat: '',
+        role: 'pengguna'
+      });
+      loadMembers();
+    } catch (error: any) {
+      alert(error.message || 'Gagal membuat akun');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus akun ${userName}? Tindakan ini tidak dapat dibatalkan.`)) {
+      return;
+    }
+
+    const { token } = useAuthStore.getState();
+
+    try {
+      const response = await fetch(`/api/member/delete/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Gagal menghapus akun');
+      }
+
+      alert('Akun berhasil dihapus!');
+      loadMembers();
+    } catch (error: any) {
+      alert(error.message || 'Gagal menghapus akun');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -64,14 +146,26 @@ export default function MemberPage() {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-          <Users className="w-6 h-6 text-indigo-600" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <Users className="w-6 h-6 text-indigo-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Daftar Member</h1>
+            <p className="text-gray-600">Kelola data member bank sampah</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Daftar Member</h1>
-          <p className="text-gray-600">Kelola data member bank sampah</p>
-        </div>
+
+        {isAdmin && (
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <UserPlus className="w-5 h-5" />
+            Tambah Akun
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -194,19 +288,32 @@ export default function MemberPage() {
                       {new Date(member.created_at).toLocaleDateString('id-ID')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => handleWhatsApp(member.no_hp, member.nama_lengkap)}
-                        disabled={!member.no_hp}
-                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                          member.no_hp
-                            ? 'bg-green-600 hover:bg-green-700 text-white'
-                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
-                        title={member.no_hp ? 'Hubungi via WhatsApp' : 'Nomor HP tidak tersedia'}
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                        <span className="hidden sm:inline">WhatsApp</span>
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleWhatsApp(member.no_hp, member.nama_lengkap)}
+                          disabled={!member.no_hp}
+                          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                            member.no_hp
+                              ? 'bg-green-600 hover:bg-green-700 text-white'
+                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          }`}
+                          title={member.no_hp ? 'Hubungi via WhatsApp' : 'Nomor HP tidak tersedia'}
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="hidden sm:inline">WhatsApp</span>
+                        </button>
+
+                        {isAdmin && member.role !== 'admin' && (
+                          <button
+                            onClick={() => handleDeleteUser(member.id, member.nama_lengkap)}
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                            title="Hapus Akun"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="hidden sm:inline">Hapus</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -215,6 +322,174 @@ export default function MemberPage() {
           </table>
         </div>
       </div>
+
+      {/* Modal Tambah Akun */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 my-8">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Tambah Akun Baru</h3>
+
+            <form onSubmit={handleCreateUser} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nama Lengkap *
+                </label>
+                <input
+                  type="text"
+                  value={createFormData.nama_lengkap}
+                  onChange={(e) => setCreateFormData({ ...createFormData, nama_lengkap: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={createFormData.email}
+                  onChange={(e) => setCreateFormData({ ...createFormData, email: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  value={createFormData.password}
+                  onChange={(e) => setCreateFormData({ ...createFormData, password: e.target.value })}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                    createFormData.password && createFormData.password.length < 8
+                      ? 'border-red-300 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-indigo-500'
+                  }`}
+                  required
+                  minLength={8}
+                />
+                {createFormData.password && createFormData.password.length < 8 ? (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <span>⚠️</span> Password harus minimal 8 karakter (saat ini: {createFormData.password.length})
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-1">Minimal 8 karakter</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nomor HP
+                </label>
+                <input
+                  type="tel"
+                  value={createFormData.no_hp}
+                  onChange={(e) => setCreateFormData({ ...createFormData, no_hp: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="08123456789"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kelurahan
+                </label>
+                <input
+                  type="text"
+                  value={createFormData.kelurahan}
+                  onChange={(e) => setCreateFormData({ ...createFormData, kelurahan: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kecamatan
+                </label>
+                <input
+                  type="text"
+                  value={createFormData.kecamatan}
+                  onChange={(e) => setCreateFormData({ ...createFormData, kecamatan: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kabupaten
+                </label>
+                <input
+                  type="text"
+                  value={createFormData.kabupaten}
+                  onChange={(e) => setCreateFormData({ ...createFormData, kabupaten: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Detail Alamat
+                </label>
+                <textarea
+                  value={createFormData.detail_alamat}
+                  onChange={(e) => setCreateFormData({ ...createFormData, detail_alamat: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Jl. Contoh No. 123, RT 01/RW 02"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Role *
+                </label>
+                <select
+                  value={createFormData.role}
+                  onChange={(e) => setCreateFormData({ ...createFormData, role: e.target.value as 'pengguna' | 'pengelola' })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  required
+                >
+                  <option value="pengguna">Member</option>
+                  <option value="pengelola">Pengelola</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setCreateFormData({
+                      nama_lengkap: '',
+                      email: '',
+                      password: '',
+                      no_hp: '',
+                      kelurahan: '',
+                      kecamatan: '',
+                      kabupaten: '',
+                      detail_alamat: '',
+                      role: 'pengguna'
+                    });
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  Buat Akun
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
