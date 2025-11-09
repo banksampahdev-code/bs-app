@@ -2,28 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { requireRole } from '@/lib/auth';
 
-export async function POST(request: NextRequest) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const user = requireRole(request, ['admin']);
   if (user instanceof Response) return user;
 
   try {
     const { judul, konten, gambar } = await request.json();
 
-    if (!judul || !konten) {
-      return NextResponse.json(
-        { error: 'Judul dan konten harus diisi' },
-        { status: 400 }
-      );
-    }
+    const updateData: any = {};
+    if (judul) updateData.judul = judul;
+    if (konten) updateData.konten = konten;
+    if (gambar !== undefined) updateData.gambar = gambar;
 
     const { data, error } = await supabaseAdmin
       .from('artikel')
-      .insert([{
-        judul,
-        konten,
-        gambar,
-        admin_id: user.id
-      }])
+      .update(updateData)
+      .eq('id', params.id)
       .select()
       .single();
 
@@ -35,12 +32,12 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      message: 'Artikel berhasil dibuat',
+      message: 'Artikel berhasil diupdate',
       data
-    }, { status: 201 });
+    });
 
   } catch (error) {
-    console.error('Create artikel error:', error);
+    console.error('Update artikel error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

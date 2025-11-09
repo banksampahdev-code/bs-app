@@ -62,3 +62,76 @@ export const setoranService = {
       body: JSON.stringify(data),
     }),
 };
+
+// ... (kode sebelumnya tetap)
+
+// Pencairan services
+export const pencairanService = {
+  request: (nominal: number) =>
+    apiCall('/pencairan/request', {
+      method: 'POST',
+      body: JSON.stringify({ nominal }),
+    }),
+
+  list: (status?: string) =>
+    apiCall(`/pencairan/list${status ? `?status=${status}` : ''}`),
+
+  approve: (id: string, status: 'approved' | 'rejected', catatan?: string) =>
+    apiCall(`/pencairan/approve/${id}`, {
+      method: 'POST',
+      body: JSON.stringify({ status, catatan }),
+    }),
+};
+
+// Artikel services
+export const artikelService = {
+  list: (limit = 10, offset = 0) =>
+    apiCall(`/artikel/list?limit=${limit}&offset=${offset}`),
+
+  create: (data: { judul: string; konten: string; gambar?: string }) =>
+    apiCall('/artikel/create', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: any) =>
+    apiCall(`/artikel/update/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    apiCall(`/artikel/delete/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
+// Member services
+export const memberService = {
+  list: (role?: string, search?: string) => {
+    const params = new URLSearchParams();
+    if (role) params.append('role', role);
+    if (search) params.append('search', search);
+    return apiCall(`/member/list?${params.toString()}`);
+  },
+
+  detail: (id: string) =>
+    apiCall(`/member/${id}`),
+};
+
+// Laporan services
+export const laporanService = {
+  export: (type: 'setoran' | 'pencairan', startDate?: string, endDate?: string) => {
+    const params = new URLSearchParams({ type });
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    
+    // For file download, we return the URL instead
+    return `${process.env.NEXT_PUBLIC_APP_URL}/api/laporan/export?${params.toString()}`;
+  },
+};
+
+// Dashboard services
+export const dashboardService = {
+  stats: () => apiCall('/dashboard/stats'),
+};
