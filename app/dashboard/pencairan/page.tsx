@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { pencairanService } from '@/lib/api';
 import { Pencairan } from '@/lib/types';
 import { Wallet, CheckCircle, XCircle } from 'lucide-react';
+import { useAuthStore } from '@/lib/store/authStore';
 
 export default function PencairanPage() {
+  const { user } = useAuthStore();
   const [pencairan, setPencairan] = useState<Pencairan[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
@@ -13,6 +15,8 @@ export default function PencairanPage() {
   const [showModal, setShowModal] = useState(false);
   const [action, setAction] = useState<'approved' | 'rejected'>('approved');
   const [catatan, setCatatan] = useState('');
+
+  const isAdminOrPengelola = user?.role === 'admin' || user?.role === 'pengelola';
 
   useEffect(() => {
     loadPencairan();
@@ -75,7 +79,7 @@ export default function PencairanPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Pencairan Saldo</h1>
-            <p className="text-gray-600">Kelola permintaan pencairan dari pengguna</p>
+            <p className="text-gray-600">Kelola permintaan pencairan dari member</p>
           </div>
         </div>
 
@@ -127,7 +131,7 @@ export default function PencairanPage() {
                   Tanggal
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Pengguna
+                  Member
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Nominal
@@ -171,7 +175,7 @@ export default function PencairanPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {item.status === 'pending' ? (
+                      {item.status === 'pending' && isAdminOrPengelola ? (
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleAction(item, 'approved')}
@@ -209,7 +213,7 @@ export default function PencairanPage() {
             </h3>
             
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <p className="text-sm text-gray-600 mb-1">Pengguna</p>
+              <p className="text-sm text-gray-600 mb-1">Member</p>
               <p className="font-medium text-gray-800">{selectedPencairan.users?.nama_lengkap}</p>
               
               <p className="text-sm text-gray-600 mb-1 mt-3">Nominal</p>

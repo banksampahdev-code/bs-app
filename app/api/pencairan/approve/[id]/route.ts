@@ -4,12 +4,13 @@ import { requireRole } from '@/lib/auth';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const user = requireRole(request, ['admin', 'pengelola']);
   if (user instanceof Response) return user;
 
   try {
+    const { id } = await params;
     const { status, catatan } = await request.json();
 
     if (!status || !['approved', 'rejected'].includes(status)) {
@@ -19,11 +20,18 @@ export async function POST(
       );
     }
 
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID pencairan tidak valid' },
+        { status: 400 }
+      );
+    }
+
     // Get pencairan data
     const { data: pencairan, error: pencairanError } = await supabaseAdmin
       .from('pencairan_saldo')
       .select('*, users:user_id (saldo)')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (pencairanError || !pencairan) {
@@ -49,7 +57,7 @@ export async function POST(
         tanggal_pencairan: new Date().toISOString(),
         catatan
       })
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (updateError) {
       return NextResponse.json(

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { memberService } from '@/lib/api';
 import { User } from '@/lib/types';
-import { Users, Search } from 'lucide-react';
+import { Users, Search, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MemberPage() {
@@ -32,6 +32,28 @@ export default function MemberPage() {
     loadMembers();
   };
 
+  const handleWhatsApp = (noHp: string | undefined, nama: string) => {
+    if (!noHp) {
+      alert('Nomor HP tidak tersedia');
+      return;
+    }
+
+    // Format nomor HP untuk WhatsApp (hapus karakter selain angka)
+    let phoneNumber = noHp.replace(/\D/g, '');
+
+    // Jika dimulai dengan 0, ganti dengan 62 (kode negara Indonesia)
+    if (phoneNumber.startsWith('0')) {
+      phoneNumber = '62' + phoneNumber.substring(1);
+    } else if (!phoneNumber.startsWith('62')) {
+      phoneNumber = '62' + phoneNumber;
+    }
+
+    const message = `Halo ${nama}, saya ingin menghubungi Anda terkait Bank Sampah.`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, '_blank');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -48,7 +70,7 @@ export default function MemberPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Daftar Member</h1>
-          <p className="text-gray-600">Kelola data pengguna bank sampah</p>
+          <p className="text-gray-600">Kelola data member bank sampah</p>
         </div>
       </div>
 
@@ -79,7 +101,7 @@ export default function MemberPage() {
             onChange={(e) => setRoleFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
           >
-            <option value="pengguna">Pengguna</option>
+            <option value="pengguna">Member</option>
             <option value="pengelola">Pengelola</option>
             <option value="admin">Admin</option>
             <option value="all">Semua Role</option>
@@ -125,12 +147,15 @@ export default function MemberPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Bergabung
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Aksi
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {members.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                     Tidak ada data member
                   </td>
                 </tr>
@@ -167,6 +192,21 @@ export default function MemberPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(member.created_at).toLocaleDateString('id-ID')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <button
+                        onClick={() => handleWhatsApp(member.no_hp, member.nama_lengkap)}
+                        disabled={!member.no_hp}
+                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                          member.no_hp
+                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                        title={member.no_hp ? 'Hubungi via WhatsApp' : 'Nomor HP tidak tersedia'}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span className="hidden sm:inline">WhatsApp</span>
+                      </button>
                     </td>
                   </tr>
                 ))

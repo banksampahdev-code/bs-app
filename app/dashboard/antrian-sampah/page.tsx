@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { setoranService } from '@/lib/api';
 import { Setoran } from '@/lib/types';
-import { ListChecks, Package, Truck } from 'lucide-react';
+import { ListChecks, Package, Truck, MessageCircle } from 'lucide-react';
 
 export default function AntrianSampahPage() {
   const [antrianPickup, setAntrianPickup] = useState<Setoran[]>([]);
@@ -35,39 +35,72 @@ export default function AntrianSampahPage() {
   };
 
   const handleValidasi = (setoran: Setoran) => {
+    console.log('Selected setoran:', setoran);
+    console.log('Setoran ID:', setoran.id);
+    if (!setoran.id) {
+      alert('Error: Data setoran tidak lengkap (ID tidak ditemukan)');
+      return;
+    }
     setSelectedSetoran(setoran);
     setShowModal(true);
   };
 
   const handleSubmitValidasi = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSetoran) return;
+    if (!selectedSetoran || !selectedSetoran.id) {
+      alert('Data setoran tidak valid');
+      return;
+    }
 
     try {
       await setoranService.validate(selectedSetoran.id, formData);
       alert('Setoran berhasil divalidasi!');
       setShowModal(false);
       setFormData({ berat_sampah: '', harga_per_kg: '' });
+      setSelectedSetoran(null);
       loadAntrian();
     } catch (error: any) {
+      console.error('Validasi error:', error);
       alert(error.message || 'Gagal validasi setoran');
     }
+  };
+
+  const handleWhatsApp = (noHp: string | undefined, nama: string) => {
+    if (!noHp) {
+      alert('Nomor HP tidak tersedia');
+      return;
+    }
+
+    // Format nomor HP untuk WhatsApp (hapus karakter selain angka)
+    let phoneNumber = noHp.replace(/\D/g, '');
+
+    // Jika dimulai dengan 0, ganti dengan 62 (kode negara Indonesia)
+    if (phoneNumber.startsWith('0')) {
+      phoneNumber = '62' + phoneNumber.substring(1);
+    } else if (!phoneNumber.startsWith('62')) {
+      phoneNumber = '62' + phoneNumber;
+    }
+
+    const message = `Halo ${nama}, kami dari Bank Sampah ingin menghubungi Anda terkait setoran sampah Anda.`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, '_blank');
   };
 
   const SetoranCard = ({ item }: { item: Setoran }) => (
     <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-3">
-        <div>
+        <div className="flex-1">
           <h3 className="font-semibold text-gray-800">{item.users?.nama_lengkap}</h3>
           <p className="text-sm text-gray-500">{item.users?.email}</p>
-          <p className="text-sm text-gray-500">{item.users?.no_hp}</p>
+          <p className="text-sm text-gray-500 mt-1">{item.users?.no_hp || 'No HP tidak tersedia'}</p>
         </div>
         <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
           {item.jenis_sampah}
         </span>
       </div>
-      
-      <div className="flex justify-between items-center">
+
+      <div className="flex justify-between items-center gap-2">
         <p className="text-sm text-gray-600">
           {new Date(item.tanggal_setor).toLocaleDateString('id-ID', {
             day: 'numeric',
@@ -75,12 +108,24 @@ export default function AntrianSampahPage() {
             year: 'numeric'
           })}
         </p>
-        <button
-          onClick={() => handleValidasi(item)}
-          className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
-        >
-          Validasi
-        </button>
+        <div className="flex gap-2">
+          {item.users?.no_hp && (
+            <button
+              onClick={() => handleWhatsApp(item.users?.no_hp, item.users?.nama_lengkap || 'Member')}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              title="Hubungi via WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Hubungi
+            </button>
+          )}
+          <button
+            onClick={() => handleValidasi(item)}
+            className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+          >
+            Validasi
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -101,7 +146,7 @@ export default function AntrianSampahPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Antrian Sampah</h1>
-          <p className="text-gray-600">Validasi setoran sampah dari pengguna</p>
+          <p className="text-gray-600">Validasi setoran sampah dari member</p>
         </div>
       </div>
 
@@ -156,7 +201,7 @@ export default function AntrianSampahPage() {
             <h3 className="text-xl font-bold text-gray-800 mb-4">Validasi Setoran</h3>
             
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <p className="text-sm text-gray-600 mb-1">Nama Pengguna</p>
+              <p className="text-sm text-gray-600 mb-1">Nama Member</p>
               <p className="font-medium text-gray-800">{selectedSetoran.users?.nama_lengkap}</p>
               
               <p className="text-sm text-gray-600 mb-1 mt-3">Jenis Sampah</p>
