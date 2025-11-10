@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('[SCAN] Received qr_data:', qr_data);
+
     // Cari user berdasarkan qr_data (bukan qr_code yang berisi image)
     const { data: foundUser, error } = await supabaseAdmin
       .from('users')
@@ -25,12 +27,25 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error || !foundUser) {
-      console.error('User not found:', error);
+      console.error('[SCAN] User not found for qr_data:', qr_data);
+      console.error('[SCAN] Database error:', error);
+
+      // Additional debugging: Check if user exists with similar qr_data
+      const { data: allUsers, error: debugError } = await supabaseAdmin
+        .from('users')
+        .select('id, email, qr_data')
+        .eq('role', 'pengguna')
+        .limit(5);
+
+      console.error('[SCAN] Sample users in database:', allUsers);
+
       return NextResponse.json(
         { error: 'User tidak ditemukan' },
         { status: 404 }
       );
     }
+
+    console.log('[SCAN] User found:', foundUser.nama_lengkap, foundUser.email);
 
     return NextResponse.json({
       id: foundUser.id,
