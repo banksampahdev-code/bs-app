@@ -8,7 +8,8 @@ export interface User {
   kabupaten?: string;
   detail_alamat?: string;
   role: 'admin' | 'pengelola' | 'pengguna';
-  qr_code?: string;
+  qr_code?: string;   // QR code image (Data URL)
+  qr_data?: string;   // QR code data string for scanning
   saldo: number;
   created_at: string;
   updated_at: string;

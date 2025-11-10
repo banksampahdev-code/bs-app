@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate QR Code
-    const qrData = `USER-${Date.now()}-${email}`;
-    const qrCode = await QRCode.toDataURL(qrData);
+    // Generate QR Code data (simple unique identifier)
+    const qrData = `BANKSAMPAH-${email}-${Date.now()}`;
+    const qrCodeImage = await QRCode.toDataURL(qrData);
 
     // Insert user ke database
     const { data, error } = await supabaseAdmin
@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
         kecamatan,
         kabupaten,
         detail_alamat,
-        qr_code: qrCode,
+        qr_code: qrCodeImage,  // QR image for display
+        qr_data: qrData,        // QR data string for scanning
         role: 'pengguna'
       }])
       .select()
