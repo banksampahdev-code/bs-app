@@ -20,9 +20,14 @@ export async function GET(request: NextRequest) {
       .select('id, nama_lengkap, email, no_hp, kelurahan, kecamatan, kabupaten, detail_alamat, role, saldo, created_at')
       .order('created_at', { ascending: false });
 
-    // Filter by role
-    if (role && role !== 'all') {
-      query = query.eq('role', role);
+    // IMPORTANT: Pengelola hanya bisa melihat member dengan role 'pengguna' saja
+    if (user.role === 'pengelola') {
+      query = query.eq('role', 'pengguna');
+    } else if (user.role === 'admin') {
+      // Admin bisa melihat semua, tapi bisa filter by role
+      if (role && role !== 'all') {
+        query = query.eq('role', role);
+      }
     }
 
     // Search by name or email

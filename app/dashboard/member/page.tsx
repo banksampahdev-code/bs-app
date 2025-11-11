@@ -284,16 +284,19 @@ export default function MemberPage() {
             </button>
           </form>
 
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-          >
-            <option value="pengguna">Member</option>
-            <option value="pengelola">Pengelola</option>
-            <option value="admin">Admin</option>
-            <option value="all">Semua Role</option>
-          </select>
+          {/* Hide role filter untuk pengelola - mereka hanya bisa lihat pengguna */}
+          {isAdmin && (
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+            >
+              <option value="pengguna">Member</option>
+              <option value="pengelola">Pengelola</option>
+              <option value="admin">Admin</option>
+              <option value="all">Semua Role</option>
+            </select>
+          )}
         </div>
       </div>
 

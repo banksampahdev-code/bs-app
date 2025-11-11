@@ -17,7 +17,8 @@ interface DashboardStats {
   pendingValidation: number;
   saldoTersedia: number;
   // Admin & Pengelola stats
-  totalMember: number;
+  totalMember: number; // Hanya untuk pengguna biasa
+  pengajuanPencairan: number; // Pengajuan pencairan pending (untuk admin/pengelola)
   totalSetoranAll: number;
   totalPencairan: number;
   setoranHariIni: number;
@@ -42,6 +43,7 @@ export default function DashboardPage() {
     pendingValidation: 0,
     saldoTersedia: 0,
     totalMember: 0,
+    pengajuanPencairan: 0,
     totalSetoranAll: 0,
     totalPencairan: 0,
     setoranHariIni: 0
@@ -129,6 +131,7 @@ export default function DashboardPage() {
       pendingValidation: 0,
       saldoTersedia: 0,
       totalMember: 0,
+      pengajuanPencairan: 0,
       totalSetoranAll: 0,
       totalPencairan: 0,
       setoranHariIni: 0
@@ -157,6 +160,7 @@ export default function DashboardPage() {
       pendingValidation: 0,
       saldoTersedia: 0,
       totalMember: 0,
+      pengajuanPencairan: 0,
       totalSetoranAll: 0,
       totalPencairan: 0,
       setoranHariIni: 0
@@ -180,8 +184,8 @@ export default function DashboardPage() {
 
       if (memberResponse.ok) {
         const members = await memberResponse.json();
-        // Filter out admin - hanya hitung pengguna dan pengelola saja
-        const actualMembers = members.filter((m: any) => m.role !== 'admin');
+        // Filter: hanya hitung role 'pengguna' saja (exclude admin dan pengelola)
+        const actualMembers = members.filter((m: any) => m.role === 'pengguna');
         setStats(prev => ({ ...prev, totalMember: actualMembers.length }));
       }
 
@@ -211,7 +215,14 @@ export default function DashboardPage() {
           .filter((p: any) => p.status === 'approved')
           .reduce((sum: number, p: any) => sum + parseFloat(p.nominal), 0);
 
-        setStats(prev => ({ ...prev, totalPencairan: totalApproved }));
+        // Hitung pengajuan pencairan yang pending
+        const pengajuanPending = pencairans.filter((p: any) => p.status === 'pending').length;
+
+        setStats(prev => ({
+          ...prev,
+          totalPencairan: totalApproved,
+          pengajuanPencairan: pengajuanPending
+        }));
       }
     } catch (error) {
       console.error('Error fetching admin/pengelola stats:', error);
@@ -454,9 +465,9 @@ export default function DashboardPage() {
           {user.role === 'pengelola' && (
             <>
               <div className="bg-white rounded-lg shadow p-6">
-                <p className="text-sm text-gray-600 mb-1">Total Member</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.totalMember}</p>
-                <p className="text-sm text-blue-600 mt-1">Member terdaftar</p>
+                <p className="text-sm text-gray-600 mb-1">Pengajuan Pencairan</p>
+                <p className="text-3xl font-bold text-purple-600">{stats.pengajuanPencairan}</p>
+                <p className="text-sm text-purple-600 mt-1">Menunggu persetujuan</p>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
@@ -476,9 +487,9 @@ export default function DashboardPage() {
           {user.role === 'admin' && (
             <>
               <div className="bg-white rounded-lg shadow p-6">
-                <p className="text-sm text-gray-600 mb-1">Total Member</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.totalMember}</p>
-                <p className="text-sm text-blue-600 mt-1">Semua member</p>
+                <p className="text-sm text-gray-600 mb-1">Pengajuan Pencairan</p>
+                <p className="text-3xl font-bold text-purple-600">{stats.pengajuanPencairan}</p>
+                <p className="text-sm text-purple-600 mt-1">Menunggu persetujuan</p>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
@@ -495,10 +506,10 @@ export default function DashboardPage() {
 
               <div className="bg-white rounded-lg shadow p-6">
                 <p className="text-sm text-gray-600 mb-1">Total Pencairan</p>
-                <p className="text-3xl font-bold text-purple-600">
+                <p className="text-3xl font-bold text-blue-600">
                   Rp {stats.totalPencairan.toLocaleString('id-ID')}
                 </p>
-                <p className="text-sm text-purple-600 mt-1">Disetujui</p>
+                <p className="text-sm text-blue-600 mt-1">Disetujui</p>
               </div>
             </>
           )}

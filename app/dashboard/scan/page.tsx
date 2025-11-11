@@ -212,7 +212,7 @@ export default function ScanPage() {
 
     try {
       const response = await fetch(`/api/setoran/validate/${selectedAntrian.id}`, {
-        method: 'PUT',
+        method: 'POST', // FIX: Changed from PUT to POST to match API route
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`

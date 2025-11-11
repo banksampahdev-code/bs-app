@@ -4,14 +4,19 @@ import { useEffect, useState } from 'react';
 import { setoranService } from '@/lib/api';
 import { Setoran } from '@/lib/types';
 import { History, Filter, Calendar } from 'lucide-react';
+import { useAuthStore } from '@/lib/store/authStore';
 
 export default function RiwayatSampahPage() {
+  const { user: currentUser } = useAuthStore();
   const [setoran, setSetoran] = useState<Setoran[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'validated' | 'rejected'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'yesterday' | '7days' | '30days' | 'custom'>('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  // Check if current user is admin or pengelola
+  const isAdminOrPengelola = currentUser?.role === 'admin' || currentUser?.role === 'pengelola';
 
   useEffect(() => {
     loadSetoran();
@@ -219,6 +224,11 @@ export default function RiwayatSampahPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tanggal
                 </th>
+                {isAdminOrPengelola && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Member
+                  </th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Jenis Sampah
                 </th>
@@ -234,12 +244,17 @@ export default function RiwayatSampahPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
+                {isAdminOrPengelola && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Divalidasi Oleh
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredSetoran.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={isAdminOrPengelola ? 8 : 6} className="px-6 py-12 text-center text-gray-500">
                     Belum ada data setoran
                   </td>
                 </tr>
@@ -249,6 +264,11 @@ export default function RiwayatSampahPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(item.tanggal_setor).toLocaleDateString('id-ID')}
                     </td>
+                    {isAdminOrPengelola && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {item.users?.nama_lengkap || '-'}
+                      </td>
+                    )}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {item.jenis_sampah}
                     </td>
@@ -256,7 +276,7 @@ export default function RiwayatSampahPage() {
                       {item.berat_sampah || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.total_harga 
+                      {item.total_harga
                         ? `Rp ${parseFloat(item.total_harga.toString()).toLocaleString('id-ID')}`
                         : '-'
                       }
@@ -271,6 +291,11 @@ export default function RiwayatSampahPage() {
                         {item.status === 'rejected' && 'Ditolak'}
                       </span>
                     </td>
+                    {isAdminOrPengelola && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {item.pengelola?.nama_lengkap || '-'}
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
