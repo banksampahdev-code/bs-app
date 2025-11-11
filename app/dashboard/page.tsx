@@ -219,6 +219,22 @@ export default function DashboardPage() {
     }
   }, [user, _hasHydrated]);
 
+  // Auto-refresh data setiap 10 detik untuk real-time updates
+  useEffect(() => {
+    if (!user || !token || !_hasHydrated) return;
+
+    const refreshInterval = setInterval(() => {
+      if (user.role === 'pengguna') {
+        fetchUserData();
+        fetchStats();
+      } else if (user.role === 'admin' || user.role === 'pengelola') {
+        fetchAdminPengelolaStats();
+      }
+    }, 10000); // Refresh setiap 10 detik
+
+    return () => clearInterval(refreshInterval);
+  }, [user, token, _hasHydrated]);
+
   if (!_hasHydrated || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">

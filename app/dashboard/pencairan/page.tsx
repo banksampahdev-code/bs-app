@@ -20,6 +20,13 @@ export default function PencairanPage() {
 
   useEffect(() => {
     loadPencairan();
+
+    // Auto-refresh setiap 10 detik untuk real-time updates
+    const refreshInterval = setInterval(() => {
+      loadPencairan();
+    }, 10000);
+
+    return () => clearInterval(refreshInterval);
   }, [filter]);
 
   const loadPencairan = async () => {

@@ -15,6 +15,13 @@ export default function RiwayatSampahPage() {
 
   useEffect(() => {
     loadSetoran();
+
+    // Auto-refresh setiap 10 detik untuk real-time updates
+    const refreshInterval = setInterval(() => {
+      loadSetoran();
+    }, 10000);
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const loadSetoran = async () => {

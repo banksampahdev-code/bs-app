@@ -19,6 +19,13 @@ export default function AntrianSampahPage() {
 
   useEffect(() => {
     loadAntrian();
+
+    // Auto-refresh setiap 5 detik untuk real-time updates
+    const refreshInterval = setInterval(() => {
+      loadAntrian();
+    }, 5000);
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const loadAntrian = async () => {
