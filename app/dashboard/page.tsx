@@ -180,7 +180,9 @@ export default function DashboardPage() {
 
       if (memberResponse.ok) {
         const members = await memberResponse.json();
-        setStats(prev => ({ ...prev, totalMember: members.length }));
+        // Filter out admin - hanya hitung pengguna dan pengelola saja
+        const actualMembers = members.filter((m: any) => m.role !== 'admin');
+        setStats(prev => ({ ...prev, totalMember: actualMembers.length }));
       }
 
       if (setoranResponse.ok) {
