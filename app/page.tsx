@@ -1,12 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Recycle, Coins, TrendingUp, Smartphone, Users, Award, Leaf } from 'lucide-react';
+import { Trash2, Recycle, Coins, TrendingUp, Smartphone, Users, Award, Leaf, Download } from 'lucide-react';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 
 export default function Home() {
   const [downloadLink, setDownloadLink] = useState('');
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     // Fetch download link from settings (no auth needed for public page)
     const fetchDownloadLink = async () => {
       try {
@@ -21,10 +29,51 @@ export default function Home() {
     };
 
     fetchDownloadLink();
+
+    // Check if app is not already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallButton(false);
+      return;
+    }
+
+    // Listen for the beforeinstallprompt event
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    window.addEventListener('appinstalled', () => {
+      setShowInstallButton(false);
+      setDeferredPrompt(null);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
+
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt) return;
+
+    await deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    }
+
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+      {/* PWA Install Notification */}
+      <PWAInstallPrompt />
+
       {/* Header/Navbar */}
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -78,7 +127,16 @@ export default function Home() {
                 <Users className="w-5 h-5" />
                 Daftar Sekarang
               </a>
-              {downloadLink && (
+              {showInstallButton && (
+                <button
+                  onClick={handleInstallPWA}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg shadow-lg"
+                >
+                  <Download className="w-5 h-5" />
+                  Install Bank Sampah
+                </button>
+              )}
+              {downloadLink && !showInstallButton && (
                 <a
                   href={downloadLink}
                   target="_blank"
@@ -235,7 +293,16 @@ export default function Home() {
               <Users className="w-5 h-5" />
               Daftar Gratis
             </a>
-            {downloadLink && (
+            {showInstallButton && (
+              <button
+                onClick={handleInstallPWA}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg shadow-lg"
+              >
+                <Download className="w-5 h-5" />
+                Install Bank Sampah
+              </button>
+            )}
+            {downloadLink && !showInstallButton && (
               <a
                 href={downloadLink}
                 target="_blank"
