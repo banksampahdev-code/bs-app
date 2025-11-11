@@ -2,7 +2,6 @@
 
 import { useAuthStore } from '@/lib/store/authStore';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
 interface MenuItem {
   title: string;
@@ -236,87 +235,15 @@ export default function DashboardPage() {
     return () => clearInterval(refreshInterval);
   }, [user, token, _hasHydrated]);
 
-  // Supabase Realtime Subscriptions untuk instant updates
+  // DISABLED SEMENTARA: Supabase Realtime (menyebabkan error)
+  // Gunakan polling saja dulu dengan interval yang lebih cepat
+  // TODO: Enable kembali setelah fix dependency issues
+  /*
   useEffect(() => {
-    if (!user || !_hasHydrated) return;
-
-    const channels: any[] = [];
-
-    // Subscribe ke perubahan setoran_sampah
-    const setoranChannel = supabase
-      .channel('setoran-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'setoran_sampah'
-        },
-        (payload) => {
-          console.log('Setoran changed:', payload);
-          // Refresh stats immediately
-          if (user.role === 'pengguna') {
-            fetchStats();
-          } else if (user.role === 'admin' || user.role === 'pengelola') {
-            fetchAdminPengelolaStats();
-          }
-        }
-      )
-      .subscribe();
-
-    channels.push(setoranChannel);
-
-    // Subscribe ke perubahan users (untuk update saldo real-time)
-    if (user.role === 'pengguna') {
-      const userChannel = supabase
-        .channel('user-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'users',
-            filter: `id=eq.${user.id}`
-          },
-          (payload) => {
-            console.log('User data changed:', payload);
-            // Refresh user data immediately
-            fetchUserData();
-          }
-        )
-        .subscribe();
-
-      channels.push(userChannel);
-    }
-
-    // Subscribe ke perubahan pencairan
-    const pencairanChannel = supabase
-      .channel('pencairan-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pencairan_saldo'
-        },
-        (payload) => {
-          console.log('Pencairan changed:', payload);
-          if (user.role === 'admin' || user.role === 'pengelola') {
-            fetchAdminPengelolaStats();
-          }
-        }
-      )
-      .subscribe();
-
-    channels.push(pencairanChannel);
-
-    // Cleanup subscriptions
-    return () => {
-      channels.forEach(channel => {
-        supabase.removeChannel(channel);
-      });
-    };
-  }, [user, _hasHydrated]);
+    if (!user || !_hasHydrated || !token) return;
+    // ... Supabase Realtime code ...
+  }, [user?.id, user?.role, _hasHydrated, token]);
+  */
 
   if (!_hasHydrated || isLoading) {
     return (

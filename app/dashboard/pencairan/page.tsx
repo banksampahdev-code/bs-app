@@ -5,7 +5,6 @@ import { pencairanService } from '@/lib/api';
 import { Pencairan } from '@/lib/types';
 import { Wallet, CheckCircle, XCircle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
-import { supabase } from '@/lib/supabase';
 
 export default function PencairanPage() {
   const { user } = useAuthStore();
@@ -22,31 +21,13 @@ export default function PencairanPage() {
   useEffect(() => {
     loadPencairan();
 
-    // Auto-refresh setiap 10 detik sebagai fallback
+    // Auto-refresh setiap 5 detik untuk near-realtime updates
     const refreshInterval = setInterval(() => {
       loadPencairan();
-    }, 10000);
-
-    // Supabase Realtime untuk instant updates
-    const pencairanChannel = supabase
-      .channel('pencairan-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pencairan_saldo'
-        },
-        (payload) => {
-          console.log('Pencairan changed (realtime):', payload);
-          loadPencairan();
-        }
-      )
-      .subscribe();
+    }, 5000); // Lebih cepat
 
     return () => {
       clearInterval(refreshInterval);
-      supabase.removeChannel(pencairanChannel);
     };
   }, [filter]);
 

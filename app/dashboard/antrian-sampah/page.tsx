@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { setoranService } from '@/lib/api';
 import { Setoran } from '@/lib/types';
 import { ListChecks, Package, Truck, MessageCircle, Search } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 
 export default function AntrianSampahPage() {
   const [antrianPickup, setAntrianPickup] = useState<Setoran[]>([]);
@@ -21,32 +20,13 @@ export default function AntrianSampahPage() {
   useEffect(() => {
     loadAntrian();
 
-    // Auto-refresh setiap 5 detik sebagai fallback
+    // Auto-refresh setiap 3 detik untuk near-realtime updates
     const refreshInterval = setInterval(() => {
       loadAntrian();
-    }, 5000);
-
-    // Supabase Realtime untuk instant updates
-    const setoranChannel = supabase
-      .channel('antrian-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to INSERT, UPDATE, DELETE
-          schema: 'public',
-          table: 'setoran_sampah'
-        },
-        (payload) => {
-          console.log('Antrian changed (realtime):', payload);
-          // Reload antrian immediately saat ada perubahan
-          loadAntrian();
-        }
-      )
-      .subscribe();
+    }, 3000); // Lebih cepat dari sebelumnya
 
     return () => {
       clearInterval(refreshInterval);
-      supabase.removeChannel(setoranChannel);
     };
   }, []);
 
