@@ -17,9 +17,15 @@ export async function apiCall(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}/api${endpoint}`, {
+  // Add cache busting untuk memastikan data selalu fresh
+  const cacheBuster = `_t=${Date.now()}`;
+  const separator = endpoint.includes('?') ? '&' : '?';
+  const urlWithCacheBuster = `${API_URL}/api${endpoint}${separator}${cacheBuster}`;
+
+  const response = await fetch(urlWithCacheBuster, {
     ...options,
     headers,
+    cache: 'no-store', // PENTING: Disable Next.js cache
   });
 
   const data = await response.json();

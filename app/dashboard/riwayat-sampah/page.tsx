@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { setoranService } from '@/lib/api';
 import { Setoran } from '@/lib/types';
 import { History, Filter, Calendar } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function RiwayatSampahPage() {
   const [setoran, setSetoran] = useState<Setoran[]>([]);
@@ -16,12 +17,32 @@ export default function RiwayatSampahPage() {
   useEffect(() => {
     loadSetoran();
 
-    // Auto-refresh setiap 10 detik untuk real-time updates
+    // Auto-refresh setiap 10 detik sebagai fallback
     const refreshInterval = setInterval(() => {
       loadSetoran();
     }, 10000);
 
-    return () => clearInterval(refreshInterval);
+    // Supabase Realtime untuk instant updates
+    const setoranChannel = supabase
+      .channel('riwayat-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'setoran_sampah'
+        },
+        (payload) => {
+          console.log('Riwayat changed (realtime):', payload);
+          loadSetoran();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(refreshInterval);
+      supabase.removeChannel(setoranChannel);
+    };
   }, []);
 
   const loadSetoran = async () => {
