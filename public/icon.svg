@@ -1,0 +1,7 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#22c55e"/>
+  <path d="M256 128L384 224L256 320L128 224L256 128Z" fill="white" fill-opacity="0.9"/>
+  <path d="M128 256L256 352L384 256" stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="200" r="24" fill="white"/>
+  <text x="256" y="440" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white" text-anchor="middle">♻️</text>
+</svg>
