@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Recycle, Coins, TrendingUp, Smartphone, Users, Award, Leaf, Download } from 'lucide-react';
+import { Trash2, Recycle, Coins, TrendingUp, Users, Award, Leaf, Download, Zap } from 'lucide-react';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -10,26 +10,10 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function Home() {
-  const [downloadLink, setDownloadLink] = useState('');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
 
-useEffect(() => {
-    // Fetch download link from settings (no auth needed for public page)
-    const fetchDownloadLink = async () => {
-      try {
-        const response = await fetch('/api/settings/public');
-        if (response.ok) {
-          const data = await response.json();
-          setDownloadLink(data.app_download_link?.value || '');
-        }
-      } catch (error) {
-        console.error('Failed to fetch download link:', error);
-      }
-    };
-
-    fetchDownloadLink();
-
+  useEffect(() => {
     // Check if app is not already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setShowInstallButton(false);
@@ -136,17 +120,6 @@ useEffect(() => {
                   Install Bank Sampah
                 </button>
               )}
-              {downloadLink && !showInstallButton && (
-                <a
-                  href={downloadLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-green-600 border-2 border-green-600 rounded-lg hover:bg-green-50 transition-colors font-semibold text-lg"
-                >
-                  <Smartphone className="w-5 h-5" />
-                  Download Aplikasi
-                </a>
-              )}
             </div>
           </div>
 
@@ -200,9 +173,9 @@ useEffect(() => {
                 description: 'Tukar sampah daur ulang dengan uang tunai langsung ke rekening Anda'
               },
               {
-                icon: <Smartphone className="w-8 h-8 text-blue-600" />,
+                icon: <Zap className="w-8 h-8 text-blue-600" />,
                 title: 'Mudah & Praktis',
-                description: 'Kelola setoran sampah kapan saja melalui aplikasi mobile'
+                description: 'Kelola setoran sampah kapan saja melalui aplikasi web'
               },
               {
                 icon: <Leaf className="w-8 h-8 text-green-600" />,
@@ -302,17 +275,6 @@ useEffect(() => {
                 Install Bank Sampah
               </button>
             )}
-            {downloadLink && !showInstallButton && (
-              <a
-                href={downloadLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-green-800 text-white rounded-lg hover:bg-green-900 transition-colors font-semibold text-lg"
-              >
-                <Smartphone className="w-5 h-5" />
-                Download Aplikasi
-              </a>
-            )}
           </div>
         </div>
       </section>
@@ -340,9 +302,6 @@ useEffect(() => {
               <ul className="space-y-2 text-sm">
                 <li><a href="/login" className="hover:text-green-400 transition-colors">Masuk</a></li>
                 <li><a href="/register" className="hover:text-green-400 transition-colors">Daftar</a></li>
-                {downloadLink && (
-                  <li><a href={downloadLink} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors">Download Aplikasi</a></li>
-                )}
               </ul>
             </div>
             <div>

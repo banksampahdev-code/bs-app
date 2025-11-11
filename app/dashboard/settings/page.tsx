@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
-import { Settings, Save, Loader2, Phone, Link } from 'lucide-react';
+import { Settings, Save, Loader2, Phone } from 'lucide-react';
 
 export default function SettingsPage() {
   const { user, token } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [csWhatsapp, setCsWhatsapp] = useState('');
-  const [downloadLink, setDownloadLink] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -36,7 +35,6 @@ export default function SettingsPage() {
 
       const data = await response.json();
       setCsWhatsapp(data.cs_whatsapp_number?.value || '');
-      setDownloadLink(data.app_download_link?.value || '');
     } catch (err: any) {
       setError(err.message || 'Gagal memuat settings');
     } finally {
@@ -67,21 +65,6 @@ export default function SettingsPage() {
       });
 
       if (!whatsappResponse.ok) throw new Error('Gagal menyimpan nomor WhatsApp');
-
-      // Save Download Link
-      const downloadResponse = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          setting_key: 'app_download_link',
-          setting_value: downloadLink
-        })
-      });
-
-      if (!downloadResponse.ok) throw new Error('Gagal menyimpan link download');
 
       setSuccess('Settings berhasil disimpan!');
       setTimeout(() => setSuccess(''), 3000);
@@ -193,48 +176,6 @@ export default function SettingsPage() {
               )}
             </div>
 
-            {/* Download Link Section */}
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Aplikasi Mobile</h2>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Link Download Aplikasi
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Link className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="url"
-                    value={downloadLink}
-                    onChange={(e) => setDownloadLink(e.target.value)}
-                    placeholder="https://example.com/download"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  Link ini akan ditampilkan sebagai tombol "Download Aplikasi" di halaman home dan dashboard user.
-                </p>
-              </div>
-
-              {/* Preview */}
-              {downloadLink && (
-                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm font-medium text-green-900 mb-2">Preview Link Download:</p>
-                  <a
-                    href={downloadLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-green-600 hover:text-green-700 underline text-sm break-all"
-                  >
-                    {downloadLink}
-                  </a>
-                </div>
-              )}
-            </div>
-
             <div className="p-6 bg-gray-50 flex justify-end gap-3">
               <button
                 type="button"
@@ -276,14 +217,6 @@ export default function SettingsPage() {
               <li>• Nomor WhatsApp akan digunakan untuk tombol "Hubungi CS" di dashboard user</li>
               <li>• Format nomor harus menggunakan kode negara (62 untuk Indonesia)</li>
               <li>• Contoh: 628123456789 (untuk nomor 0812-3456-789)</li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-blue-900 mb-1">Link Download Aplikasi:</p>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Link akan ditampilkan di halaman home dan dashboard user</li>
-              <li>• Pastikan link valid dan mengarah ke file/halaman download aplikasi</li>
-              <li>• Dapat berupa link Google Drive, Play Store, atau hosting lainnya</li>
             </ul>
           </div>
         </div>
