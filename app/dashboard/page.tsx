@@ -444,12 +444,30 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-600 mb-1">Total Setoran Saya</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.totalSetoran}</p>
                 <p className="text-sm text-green-600 mt-1">Tervalidasi</p>
+                <a
+                  href="/dashboard/riwayat-sampah"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-green-600 hover:text-green-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
                 <p className="text-sm text-gray-600 mb-1">Menunggu Validasi</p>
                 <p className="text-3xl font-bold text-yellow-600">{stats.pendingValidation}</p>
                 <p className="text-sm text-yellow-600 mt-1">Perlu review</p>
+                <a
+                  href="/dashboard/riwayat-sampah"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-yellow-600 hover:text-yellow-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
@@ -458,6 +476,15 @@ export default function DashboardPage() {
                   Rp {stats.saldoTersedia.toLocaleString('id-ID')}
                 </p>
                 <p className="text-sm text-green-600 mt-1">Siap dicairkan</p>
+                <a
+                  href="/dashboard/saldo"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-green-600 hover:text-green-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
             </>
           )}
@@ -468,18 +495,45 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-600 mb-1">Pengajuan Pencairan</p>
                 <p className="text-3xl font-bold text-purple-600">{stats.pengajuanPencairan}</p>
                 <p className="text-sm text-purple-600 mt-1">Menunggu persetujuan</p>
+                <a
+                  href="/dashboard/pencairan"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
                 <p className="text-sm text-gray-600 mb-1">Total Antrian Sampah</p>
                 <p className="text-3xl font-bold text-orange-600">{stats.pendingValidation}</p>
                 <p className="text-sm text-orange-600 mt-1">Belum tervalidasi</p>
+                <a
+                  href="/dashboard/antrian-sampah"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
                 <p className="text-sm text-gray-600 mb-1">Setoran Hari Ini</p>
                 <p className="text-3xl font-bold text-green-600">{stats.setoranHariIni}</p>
                 <p className="text-sm text-green-600 mt-1">Transaksi</p>
+                <a
+                  href="/dashboard/riwayat-sampah"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-green-600 hover:text-green-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
             </>
           )}
@@ -490,18 +544,45 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-600 mb-1">Pengajuan Pencairan</p>
                 <p className="text-3xl font-bold text-purple-600">{stats.pengajuanPencairan}</p>
                 <p className="text-sm text-purple-600 mt-1">Menunggu persetujuan</p>
+                <a
+                  href="/dashboard/pencairan"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
                 <p className="text-sm text-gray-600 mb-1">Total Antrian Sampah</p>
                 <p className="text-3xl font-bold text-orange-600">{stats.pendingValidation}</p>
                 <p className="text-sm text-orange-600 mt-1">Belum tervalidasi</p>
+                <a
+                  href="/dashboard/antrian-sampah"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
                 <p className="text-sm text-gray-600 mb-1">Total Setoran</p>
                 <p className="text-3xl font-bold text-green-600">{stats.totalSetoranAll}</p>
                 <p className="text-sm text-green-600 mt-1">Tervalidasi</p>
+                <a
+                  href="/dashboard/riwayat-sampah"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-green-600 hover:text-green-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
 
               <div className="bg-white rounded-lg shadow p-6">
@@ -510,6 +591,15 @@ export default function DashboardPage() {
                   Rp {stats.totalPencairan.toLocaleString('id-ID')}
                 </p>
                 <p className="text-sm text-blue-600 mt-1">Disetujui</p>
+                <a
+                  href="/dashboard/pencairan"
+                  className="inline-flex items-center gap-1 mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Lihat
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
             </>
           )}

@@ -323,7 +323,7 @@ export default function LaporanPage() {
             <FileText className="w-8 h-8 opacity-80" />
             <div className="text-right">
               <p className="text-2xl font-bold">
-                Rp {((stats.totalNominalSetoran - stats.totalNominalPencairan) / 1000000).toFixed(1)}Jt
+                Rp {(stats.totalNominalSetoran - stats.totalNominalPencairan).toLocaleString('id-ID')}
               </p>
             </div>
           </div>
