@@ -1,14 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 
 export default function LoginPage() {
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const { user, _hasHydrated, setAuth } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  // Auto-redirect jika sudah login
+  useEffect(() => {
+    if (!_hasHydrated) {
+      return;
+    }
+
+    if (user) {
+      console.log('✅ Already logged in, redirecting to dashboard...');
+      window.location.href = '/dashboard';
+      return;
+    }
+
+    setIsChecking(false);
+  }, [user, _hasHydrated]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +59,18 @@ export default function LoginPage() {
       setLoading(false); // Set false hanya jika error
     }
   };
+
+  // Show loading saat checking auth
+  if (!_hasHydrated || isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

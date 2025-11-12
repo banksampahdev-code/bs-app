@@ -41,15 +41,31 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // IMPORTANT: Never cache API calls or dynamic data
+  // This ensures fresh data on every app open
+  if (
+    url.pathname.startsWith('/api/') ||
+    request.method !== 'GET' ||
+    url.pathname.includes('_next/data')
+  ) {
+    // Always fetch from network for API calls
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // For static assets, use cache-first strategy
   event.respondWith(
-    caches.match(event.request)
+    caches.match(request)
       .then((response) => {
         // Cache hit - return response
         if (response) {
           return response;
         }
 
-        return fetch(event.request).then(
+        return fetch(request).then(
           (response) => {
             // Check if we received a valid response
             if (!response || response.status !== 200 || response.type !== 'basic') {
@@ -59,10 +75,13 @@ self.addEventListener('fetch', (event) => {
             // Clone the response
             const responseToCache = response.clone();
 
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
+            // Only cache GET requests for static assets
+            if (request.method === 'GET') {
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  cache.put(request, responseToCache);
+                });
+            }
 
             return response;
           }

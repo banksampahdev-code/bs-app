@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Trash2, Recycle, Coins, TrendingUp, Users, Award, Leaf, Download, Zap } from 'lucide-react';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import { useAuthStore } from '@/lib/store/authStore';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,8 +11,28 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function Home() {
+  const { user, _hasHydrated } = useAuthStore();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  // Auto-redirect ke dashboard jika sudah login
+  useEffect(() => {
+    // Tunggu hydration selesai
+    if (!_hasHydrated) {
+      return;
+    }
+
+    // Jika user sudah login, redirect ke dashboard
+    if (user) {
+      console.log('✅ User detected, redirecting to dashboard...');
+      window.location.href = '/dashboard';
+      return;
+    }
+
+    // User belum login, tampilkan landing page
+    setIsChecking(false);
+  }, [user, _hasHydrated]);
 
   useEffect(() => {
     // Check if app is not already installed
@@ -52,6 +73,18 @@ export default function Home() {
     setDeferredPrompt(null);
     setShowInstallButton(false);
   };
+
+  // Show loading saat checking auth
+  if (!_hasHydrated || isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">

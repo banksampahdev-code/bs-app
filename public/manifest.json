@@ -3,10 +3,12 @@
   "short_name": "Bank Sampah",
   "description": "Aplikasi Bank Sampah untuk mengelola sampah dan reward",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#22c55e",
   "orientation": "portrait",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-72x72.png",
