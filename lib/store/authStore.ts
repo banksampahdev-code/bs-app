@@ -23,29 +23,44 @@ interface AuthState {
 // Custom storage yang lebih reliable untuk PWA
 const customStorage = {
   getItem: (name: string): string | null => {
+    if (typeof window === 'undefined') return null;
     try {
       const value = localStorage.getItem(name);
-      console.log('🔑 Auth Storage - GET:', name, value ? 'Found' : 'Not found');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔑 Auth Storage - GET:', name, value ? 'Found' : 'Not found');
+      }
       return value;
     } catch (error) {
-      console.error('Error reading from localStorage:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error reading from localStorage:', error);
+      }
       return null;
     }
   },
   setItem: (name: string, value: string): void => {
+    if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(name, value);
-      console.log('💾 Auth Storage - SET:', name, 'Saved successfully');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('💾 Auth Storage - SET:', name, 'Saved successfully');
+      }
     } catch (error) {
-      console.error('Error writing to localStorage:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error writing to localStorage:', error);
+      }
     }
   },
   removeItem: (name: string): void => {
+    if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(name);
-      console.log('🗑️ Auth Storage - REMOVE:', name);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🗑️ Auth Storage - REMOVE:', name);
+      }
     } catch (error) {
-      console.error('Error removing from localStorage:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error removing from localStorage:', error);
+      }
     }
   },
 };
@@ -57,11 +72,15 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       _hasHydrated: false,
       setAuth: (user, token) => {
-        console.log('🔐 Setting auth:', { userId: user.id, role: user.role });
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.log('🔐 Setting auth:', { userId: user.id, role: user.role });
+        }
         set({ user, token });
       },
       logout: () => {
-        console.log('👋 Logging out');
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.log('👋 Logging out');
+        }
         set({ user: null, token: null });
       },
       setHasHydrated: (state) => set({ _hasHydrated: state }),
@@ -77,36 +96,24 @@ export const useAuthStore = create<AuthState>()(
       }),
       version: 1, // For future migrations
       onRehydrateStorage: () => {
-        console.log('🔄 Hydration starting...');
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.log('🔄 Hydration starting...');
+        }
         return (state, error) => {
           if (error) {
-            console.error('❌ Hydration failed:', error);
+            if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+              console.error('❌ Hydration failed:', error);
+            }
           } else {
-            console.log('✅ Hydration complete:', {
-              hasUser: !!state?.user,
-              hasToken: !!state?.token,
-            });
+            if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+              console.log('✅ Hydration complete:', {
+                hasUser: !!state?.user,
+                hasToken: !!state?.token,
+              });
+            }
             state?.setHasHydrated(true);
           }
         };
-      },
-      // Serialize dengan error handling
-      serialize: (state) => {
-        try {
-          return JSON.stringify(state);
-        } catch (error) {
-          console.error('Serialization error:', error);
-          return '{}';
-        }
-      },
-      // Deserialize dengan error handling
-      deserialize: (str) => {
-        try {
-          return JSON.parse(str);
-        } catch (error) {
-          console.error('Deserialization error:', error);
-          return {};
-        }
       },
     }
   )

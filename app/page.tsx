@@ -25,7 +25,9 @@ export default function Home() {
 
     // Jika user sudah login, redirect ke dashboard
     if (user) {
-      console.log('✅ User detected, redirecting to dashboard...');
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.log('✅ User detected, redirecting to dashboard...');
+      }
       window.location.href = '/dashboard';
       return;
     }
