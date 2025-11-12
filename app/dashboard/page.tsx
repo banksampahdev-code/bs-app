@@ -698,6 +698,13 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+
+        {/* Footer Text */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <p className="text-center text-xs text-gray-500">
+            Didanai oleh Direktorat Penelitian Dan Pengabdian Kepada Masyarakat, Direktorat Jenderal Riset Dan Pengembangan, Kementerian Pendidikan Tinggi, Sains Dan Teknologi.
+          </p>
+        </div>
     </div>
   );
 }

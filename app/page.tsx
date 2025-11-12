@@ -348,6 +348,9 @@ export default function Home() {
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
             <p>&copy; 2025 Bank Sampah. All rights reserved.</p>
+            <p className="mt-4 text-xs text-gray-400">
+              Didanai oleh Direktorat Penelitian Dan Pengabdian Kepada Masyarakat, Direktorat Jenderal Riset Dan Pengembangan, Kementerian Pendidikan Tinggi, Sains Dan Teknologi.
+            </p>
           </div>
         </div>
       </footer>
