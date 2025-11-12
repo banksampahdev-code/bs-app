@@ -16,7 +16,17 @@ export async function PUT(
     const updateData: any = {};
     if (judul) updateData.judul = judul;
     if (konten) updateData.konten = konten;
-    if (gambar !== undefined) updateData.gambar = gambar;
+
+    if (gambar !== undefined) {
+      // gambar bisa berupa string (legacy URL) atau object dengan multiple sizes
+      if (typeof gambar === 'object' && gambar !== null) {
+        // Jika gambar adalah object dengan desktop, tablet, mobile URLs
+        // Simpan sebagai JSON string
+        updateData.gambar = JSON.stringify(gambar);
+      } else {
+        updateData.gambar = gambar;
+      }
+    }
 
     const { data, error } = await supabaseAdmin
       .from('artikel')

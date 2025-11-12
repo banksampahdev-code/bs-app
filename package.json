@@ -12,6 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.80.0",
     "bcryptjs": "^3.0.3",
+    "browser-image-compression": "^2.0.2",
     "html5-qrcode": "^2.3.8",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.553.0",
@@ -20,6 +21,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "recharts": "^3.3.0",
+    "sharp": "^0.34.5",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.8"
   },

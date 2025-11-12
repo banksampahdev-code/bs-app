@@ -16,12 +16,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // gambar bisa berupa string (legacy URL) atau object dengan multiple sizes
+    let gambarData = gambar;
+    if (typeof gambar === 'object' && gambar !== null) {
+      // Jika gambar adalah object dengan desktop, tablet, mobile URLs
+      // Simpan sebagai JSON string
+      gambarData = JSON.stringify(gambar);
+    }
+
     const { data, error } = await supabaseAdmin
       .from('artikel')
       .insert([{
         judul,
         konten,
-        gambar,
+        gambar: gambarData,
         admin_id: user.id
       }])
       .select()
