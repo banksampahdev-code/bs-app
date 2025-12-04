@@ -18,13 +18,9 @@ export async function POST(request: NextRequest) {
 
     const normalizedCode = code.toLowerCase();
 
-    const users = await prisma.user.findMany({
-      where: {
-        role: 'pengguna',
-        id: {
-          endsWith: normalizedCode
-        }
-      },
+    // Uuid filter tidak mendukung endsWith, jadi filter di sisi app
+    const candidates = await prisma.user.findMany({
+      where: { role: 'pengguna' },
       select: {
         id: true,
         nama_lengkap: true,
@@ -33,7 +29,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const foundUser = users?.[0];
+    const foundUser = candidates.find((u) =>
+      u.id.toLowerCase().endsWith(normalizedCode)
+    );
 
     if (!foundUser) {
       return NextResponse.json(

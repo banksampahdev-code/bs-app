@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
     let stats: any = {};
 
@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
         setoranPending: setoran?.filter(s => s.status === 'pending').length || 0,
         setoranValidated: setoran?.filter(s => s.status === 'validated').length || 0,
         setoranBulanIni: setoran?.filter(s => 
-          s.tanggal_setor >= firstDayOfMonth && s.tanggal_setor <= lastDayOfMonth
+          new Date(s.tanggal_setor).getTime() >= firstDayOfMonth.getTime() &&
+          new Date(s.tanggal_setor).getTime() <= lastDayOfMonth.getTime()
         ).length || 0,
         totalPencairan: pencairan?.filter(p => p.status === 'approved')
           .reduce((sum, p) => sum + Number(p.nominal), 0) || 0,
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
         setoranPending: setoran?.filter(s => s.status === 'pending').length || 0,
         setoranValidated: setoran?.filter(s => s.status === 'validated').length || 0,
         setoranBulanIni: setoran?.filter(s => 
-          s.tanggal_setor >= firstDayOfMonth && s.tanggal_setor <= lastDayOfMonth
+          new Date(s.tanggal_setor).getTime() >= firstDayOfMonth.getTime() &&
+          new Date(s.tanggal_setor).getTime() <= lastDayOfMonth.getTime()
         ).length || 0,
         pencairanPending: pencairan?.filter(p => p.status === 'pending').length || 0,
         totalUsers: totalUsers || 0
@@ -68,7 +70,8 @@ export async function GET(request: NextRequest) {
         totalSetoran: setoran?.length || 0,
         setoranValidated: setoran?.filter(s => s.status === 'validated').length || 0,
         setoranBulanIni: setoran?.filter(s => 
-          s.tanggal_setor >= firstDayOfMonth && s.tanggal_setor <= lastDayOfMonth
+          new Date(s.tanggal_setor).getTime() >= firstDayOfMonth.getTime() &&
+          new Date(s.tanggal_setor).getTime() <= lastDayOfMonth.getTime()
         ).length || 0,
         totalUsers: totalUsers || 0,
         totalPengelola: totalPengelola || 0,
