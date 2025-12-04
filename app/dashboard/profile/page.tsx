@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 
-export default function CompleteProfilePage() {
+export default function ProfilePage() {
   const { user, token, updateUser, _hasHydrated } = useAuthStore();
   const [formData, setFormData] = useState({
     no_hp: '',
@@ -21,18 +21,13 @@ export default function CompleteProfilePage() {
 
   useEffect(() => {
     if (!_hasHydrated || !user) return;
-    if (user.profile_completed) {
-      window.location.href = '/dashboard';
-      return;
-    }
-
     setFormData({
       no_hp: user.no_hp || '',
       kelurahan: user.kelurahan || '',
       kecamatan: user.kecamatan || '',
       kabupaten: user.kabupaten || '',
       detail_alamat: user.detail_alamat || '',
-    } as any);
+    });
   }, [user, _hasHydrated]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,18 +42,14 @@ export default function CompleteProfilePage() {
         },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || 'Gagal menyimpan profil');
       }
-
       if (data.user) {
         updateUser(data.user);
       }
-
-      alert('Profil berhasil dilengkapi');
-      window.location.href = '/dashboard';
+      alert('Profil berhasil diperbarui');
     } catch (err: any) {
       alert(err.message || 'Gagal menyimpan profil');
     } finally {
@@ -76,12 +67,30 @@ export default function CompleteProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto bg-white shadow rounded-lg p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-2">Lengkapi Profil</h1>
-      <p className="text-gray-600 mb-6">
-        Isi data berikut untuk melengkapi profil Anda.
-      </p>
+      <h1 className="text-2xl font-bold text-gray-800 mb-2">Profil</h1>
+      <p className="text-gray-600 mb-6">Ubah informasi kontak dan alamat Anda.</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+          <input
+            type="text"
+            value={user.nama_lengkap}
+            disabled
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
+            type="email"
+            value={user.email}
+            disabled
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nomor HP</label>
           <input
@@ -89,7 +98,7 @@ export default function CompleteProfilePage() {
             value={formData.no_hp}
             onChange={(e) => setFormData({ ...formData, no_hp: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-            required
+            placeholder="08123456789"
           />
         </div>
 
@@ -101,7 +110,6 @@ export default function CompleteProfilePage() {
               value={formData.kelurahan}
               onChange={(e) => setFormData({ ...formData, kelurahan: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-              required
             />
           </div>
           <div>
@@ -111,7 +119,6 @@ export default function CompleteProfilePage() {
               value={formData.kecamatan}
               onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-              required
             />
           </div>
           <div>
@@ -121,7 +128,6 @@ export default function CompleteProfilePage() {
               value={formData.kabupaten}
               onChange={(e) => setFormData({ ...formData, kabupaten: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-              required
             />
           </div>
         </div>
@@ -134,7 +140,6 @@ export default function CompleteProfilePage() {
             rows={3}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
             placeholder="Jalan/RT/RW/Patokan"
-            required
           />
         </div>
 
@@ -143,7 +148,7 @@ export default function CompleteProfilePage() {
           disabled={loading}
           className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50"
         >
-          {loading ? 'Menyimpan...' : 'Simpan dan Lanjutkan'}
+          {loading ? 'Menyimpan...' : 'Simpan Perubahan'}
         </button>
       </form>
     </div>

@@ -93,6 +93,7 @@ export default function DashboardLayout({
       case 'pengguna': // Backend tetap 'pengguna'
         return [
           { title: 'Dashboard', icon: iconMap.home, href: '/dashboard' },
+          { title: 'Profil', icon: iconMap.settings, href: '/dashboard/profile' },
           { title: 'Setor Sampah', icon: iconMap.trash, href: '/dashboard/setor-sampah' },
           { title: 'Riwayat', icon: iconMap.history, href: '/dashboard/riwayat-sampah' },
           { title: 'Saldo', icon: iconMap.wallet, href: '/dashboard/saldo' },

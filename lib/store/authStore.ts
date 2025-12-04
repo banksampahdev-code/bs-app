@@ -7,6 +7,12 @@ interface User {
   email: string;
   role: 'admin' | 'pengelola' | 'pengguna';
   saldo: number;
+  no_hp?: string;
+  kelurahan?: string;
+  kecamatan?: string;
+  kabupaten?: string;
+  detail_alamat?: string;
+  profile_completed?: boolean;
   qr_code?: string;
 }
 
@@ -25,15 +31,8 @@ const customStorage = {
   getItem: (name: string): string | null => {
     if (typeof window === 'undefined') return null;
     try {
-      const value = localStorage.getItem(name);
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔑 Auth Storage - GET:', name, value ? 'Found' : 'Not found');
-      }
-      return value;
+      return localStorage.getItem(name);
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error reading from localStorage:', error);
-      }
       return null;
     }
   },
@@ -41,26 +40,16 @@ const customStorage = {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(name, value);
-      if (process.env.NODE_ENV === 'development') {
-        console.log('💾 Auth Storage - SET:', name, 'Saved successfully');
-      }
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error writing to localStorage:', error);
-      }
+      // ignore
     }
   },
   removeItem: (name: string): void => {
     if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(name);
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🗑️ Auth Storage - REMOVE:', name);
-      }
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error removing from localStorage:', error);
-      }
+      // ignore
     }
   },
 };
@@ -72,19 +61,19 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       _hasHydrated: false,
       setAuth: (user, token) => {
-        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-          console.log('🔐 Setting auth:', { userId: user.id, role: user.role });
-        }
-        set({ user, token });
+        set({
+          user: { ...user, profile_completed: user.profile_completed ?? false },
+          token,
+        });
       },
       logout: () => {
-        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-          console.log('👋 Logging out');
-        }
         set({ user: null, token: null });
       },
       setHasHydrated: (state) => set({ _hasHydrated: state }),
-      updateUser: (user) => set({ user }),
+      updateUser: (user) =>
+        set({
+          user: { ...user, profile_completed: user.profile_completed ?? false },
+        }),
     }),
     {
       name: 'bank-sampah-auth', // Unique name for this app
@@ -94,26 +83,20 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         token: state.token,
       }),
-      version: 1, // For future migrations
+      version: 2, // bump to ensure new fields persisted
       onRehydrateStorage: () => {
-        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-          console.log('🔄 Hydration starting...');
-        }
         return (state, error) => {
-          if (error) {
-            if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-              console.error('❌ Hydration failed:', error);
-            }
-          } else {
-            if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-              console.log('✅ Hydration complete:', {
-                hasUser: !!state?.user,
-                hasToken: !!state?.token,
-              });
-            }
+          if (!error) {
             state?.setHasHydrated(true);
           }
         };
+      },
+      migrate: (persistedState: any) => {
+        // ensure profile_completed exists
+        if (persistedState?.user && persistedState.user.profile_completed === undefined) {
+          persistedState.user.profile_completed = false;
+        }
+        return persistedState;
       },
     }
   )

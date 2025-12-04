@@ -38,10 +38,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Normalize role to expected union
+    const role: 'admin' | 'pengelola' | 'pengguna' =
+      user.role === 'admin' || user.role === 'pengelola' || user.role === 'pengguna'
+        ? user.role
+        : 'pengguna';
+
     // Generate JWT token
     const token = generateToken({
       id: user.id,
-      role: user.role
+      role
     });
 
     console.log('Login successful for:', user.email, 'Role:', user.role);
@@ -52,10 +58,15 @@ export async function POST(request: NextRequest) {
         id: user.id,
         nama_lengkap: user.nama_lengkap,
         email: user.email,
-        role: user.role,
+        role,
         saldo: Number(user.saldo ?? 0),
         qr_code: user.qr_code,
-        profile_completed: user.profile_completed
+        profile_completed: user.profile_completed,
+        no_hp: user.no_hp,
+        kelurahan: user.kelurahan,
+        kecamatan: user.kecamatan,
+        kabupaten: user.kabupaten,
+        detail_alamat: user.detail_alamat,
       }
     });
 

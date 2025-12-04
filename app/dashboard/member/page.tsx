@@ -879,12 +879,26 @@ export default function MemberPage() {
               Download Template
             </button>
             <form onSubmit={handleImport} className="space-y-4">
-              <input
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                className="w-full"
-              />
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">Pilih File</p>
+                <label className="flex items-center gap-3 w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors">
+                  <div className="w-10 h-10 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-semibold">
+                    XLS
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-800">
+                      {importFile ? importFile.name : 'Pilih file XLSX/CSV'}
+                    </p>
+                    <p className="text-xs text-gray-500">Klik di sini untuk memilih file</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
               <div className="flex gap-3">
                 <button
                   type="button"

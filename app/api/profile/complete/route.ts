@@ -13,16 +13,16 @@ export async function POST(request: NextRequest) {
   try {
     const { no_hp, kelurahan, kecamatan, kabupaten, detail_alamat } = await request.json();
 
+    const data: any = { profile_completed: true };
+    if (no_hp !== undefined) data.no_hp = no_hp || null;
+    if (kelurahan !== undefined) data.kelurahan = kelurahan || null;
+    if (kecamatan !== undefined) data.kecamatan = kecamatan || null;
+    if (kabupaten !== undefined) data.kabupaten = kabupaten || null;
+    if (detail_alamat !== undefined) data.detail_alamat = detail_alamat || null;
+
     const updated = await prisma.user.update({
       where: { id: user.id },
-      data: {
-        no_hp: no_hp || null,
-        kelurahan: kelurahan || null,
-        kecamatan: kecamatan || null,
-        kabupaten: kabupaten || null,
-        detail_alamat: detail_alamat || null,
-        profile_completed: true,
-      },
+      data,
       select: {
         id: true,
         nama_lengkap: true,
@@ -31,6 +31,11 @@ export async function POST(request: NextRequest) {
         saldo: true,
         qr_code: true,
         profile_completed: true,
+        no_hp: true,
+        kelurahan: true,
+        kecamatan: true,
+        kabupaten: true,
+        detail_alamat: true,
       }
     });
 
