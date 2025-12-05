@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { memberService } from '@/lib/api';
 import { User } from '@/lib/types';
-import { Users, Search, MessageCircle, UserPlus, Trash2, Eye, X, Upload, Download, FileText } from 'lucide-react';
+import { Users, Search, MessageCircle, UserPlus, Trash2, Eye, X, Upload, Download, FileText, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/authStore';
 import { clearAllCache } from '@/lib/cache-utils';
@@ -23,6 +23,13 @@ export default function MemberPage() {
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
   const [emailError, setEmailError] = useState('');
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    password: '',
+    confirmPassword: '',
+  });
   const [createFormData, setCreateFormData] = useState({
     nama_lengkap: '',
     email: '',
@@ -250,6 +257,45 @@ export default function MemberPage() {
       loadMembers();
     } catch (error: any) {
       alert(error.message || 'Gagal menghapus akun');
+    }
+  };
+
+  const handleOpenPasswordModal = (member: User) => {
+    setSelectedMember(member);
+    setPasswordForm({ password: '', confirmPassword: '' });
+    setPasswordError('');
+    setShowDetailModal(false);
+    setShowPasswordModal(true);
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMember) {
+      setPasswordError('Pilih member terlebih dahulu');
+      return;
+    }
+
+    if (!passwordForm.password || passwordForm.password.length < 8) {
+      setPasswordError('Password minimal 8 karakter');
+      return;
+    }
+
+    if (passwordForm.password !== passwordForm.confirmPassword) {
+      setPasswordError('Konfirmasi password tidak cocok');
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+      await memberService.changePassword(selectedMember.id, passwordForm.password);
+      alert('Password berhasil diubah');
+      setShowPasswordModal(false);
+      setPasswordForm({ password: '', confirmPassword: '' });
+      setPasswordError('');
+    } catch (error: any) {
+      setPasswordError(error.message || 'Gagal mengubah password');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -524,6 +570,17 @@ export default function MemberPage() {
                           <span className="hidden sm:inline">Detail</span>
                         </button>
 
+                        {isAdmin && member.role !== 'admin' && (
+                          <button
+                            onClick={() => handleOpenPasswordModal(member)}
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+                            title="Ubah Password"
+                          >
+                            <KeyRound className="w-4 h-4" />
+                            <span className="hidden sm:inline">Password</span>
+                          </button>
+                        )}
+
                         <button
                           onClick={() => handleWhatsApp(member.no_hp, member.nama_lengkap)}
                           disabled={!member.no_hp}
@@ -672,6 +729,91 @@ export default function MemberPage() {
                 Tutup
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ubah Password */}
+      {showPasswordModal && selectedMember && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 my-8 mx-4">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center font-bold text-lg">
+                <KeyRound className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-800">Ubah Password</h3>
+                <p className="text-sm text-gray-600">
+                  {selectedMember.nama_lengkap} &bull; {selectedMember.email}
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password Baru
+                </label>
+                <input
+                  type="password"
+                  value={passwordForm.password}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                    passwordForm.password && passwordForm.password.length < 8
+                      ? 'border-red-300 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-amber-500'
+                  }`}
+                  minLength={8}
+                  required
+                  placeholder="Minimal 8 karakter"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Konfirmasi Password
+                </label>
+                <input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                    passwordForm.confirmPassword &&
+                    passwordForm.password !== passwordForm.confirmPassword
+                      ? 'border-red-300 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-amber-500'
+                  }`}
+                  minLength={8}
+                  required
+                  placeholder="Ulangi password baru"
+                />
+              </div>
+
+              {passwordError && (
+                <p className="text-sm text-red-600">{passwordError}</p>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setPasswordForm({ password: '', confirmPassword: '' });
+                    setPasswordError('');
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={changingPassword}
+                  className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {changingPassword ? 'Menyimpan...' : 'Simpan Password'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

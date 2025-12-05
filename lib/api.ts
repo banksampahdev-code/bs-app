@@ -129,6 +129,12 @@ export const memberService = {
 
   detail: (id: string) =>
     apiCall(`/member/${id}`),
+
+  changePassword: (id: string, password: string) =>
+    apiCall(`/member/${id}/password`, {
+      method: 'PUT',
+      body: JSON.stringify({ password }),
+    }),
 };
 
 // Laporan services

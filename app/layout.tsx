@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PWARegister from "./components/PWARegister";
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   title: "Bank Sampah App",
   description: "Aplikasi Bank Sampah untuk mengelola sampah dan reward",
   manifest: "/manifest.json",
-  themeColor: "#22c55e",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -32,11 +31,13 @@ export const metadata: Metadata = {
       { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
     ],
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#22c55e",
 };
 
 export default function RootLayout({

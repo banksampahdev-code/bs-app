@@ -8,7 +8,7 @@ export const revalidate = 0;
 export async function GET() {
   try {
     const data = await prisma.appSetting.findMany({
-      where: { setting_key: { in: ['app_download_link'] } },
+      where: { setting_key: { in: ['app_download_link', 'cs_whatsapp_number'] } },
       orderBy: { setting_key: 'asc' },
     });
 

@@ -12,9 +12,24 @@ function LoginPageComponent() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [csWhatsapp, setCsWhatsapp] = useState('');
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Fetch public settings (CS WhatsApp) for forgot password CTA
+  useEffect(() => {
+    fetch('/api/settings/public')
+      .then((res) => res.json())
+      .then((data) => {
+        const raw = data?.cs_whatsapp_number?.value || '';
+        const digits = raw.replace(/\D/g, '');
+        setCsWhatsapp(digits);
+      })
+      .catch(() => {
+        setCsWhatsapp('');
+      });
   }, []);
 
   // Auto-redirect jika sudah login
@@ -139,6 +154,23 @@ function LoginPageComponent() {
               required
               disabled={loading}
             />
+            <div className="flex justify-center mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const number = csWhatsapp || '62';
+                  const phone = number.startsWith('62') ? number : `62${number.replace(/^0/, '')}`;
+                  const message = encodeURIComponent(
+                    `Halo Admin, saya lupa password Bank Sampah.\nEmail: ${email || '-belum diisi-'}\nMohon bantuan reset.`
+                  );
+                  window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+                }}
+                className="text-sm text-green-600 hover:text-green-700 font-medium disabled:text-gray-400"
+                disabled={!csWhatsapp}
+              >
+                Lupa password? Hubungi Admin via WhatsApp
+              </button>
+            </div>
           </div>
 
           <button
